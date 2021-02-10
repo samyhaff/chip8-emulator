@@ -176,9 +176,11 @@ void emulateCycle() {
             switch (opcode & 0x000f) {
                 case 0x000e:
                     // key
+                    pc += 2;
                     break;
                 case 0x0001:
                     // key
+                    pc += 2;
                     break;
             }
             break;
@@ -186,33 +188,47 @@ void emulateCycle() {
             switch (opcode & 0x000f) {
                 case 0x0007:
                     V[(opcode & 0x0f00) >> 8] = delay_timer;
+                    pc += 2;
                     break;
                 case 0x000a:
                     // key
+                    pc += 2;
                     break;
                 case 0x0005:
                     switch (opcode & 0x00f0) {
                         case 0x0010:
                             delay_timer = V[(opcode & 0x0f00) >> 8];
+                            pc += 2;
                             break;
                         case 0x0050:
-                            // memory
+                            for (int i = 0; i <= (opcode & 0x0f00) >> 8; i++) 
+                                memory[I + i] = V[i];
+                            pc += 2;
                             break;
                         case 0x0060:
+                            for (int i = 0; i <= (opcode & 0x0f00) >> 8; i++)
+                                V[i] = memory[I + i];
+                            pc += 2;
                             break;
                     }
                     break;
                 case 0x0008:
                     sound_timer = V[(opcode & 0x0f00) >> 8];
+                    pc += 2;
                     break;
                 case 0x000e:
                     I += V[(opcode & 0x0f00) >> 8];
+                    pc += 2;
                     break;
                 case 0x0009:
                     // graphics
+                    pc += 2;
                     break;
                 case 0x0003:
-                    // decimal
+                    memory[I]     = V[(opcode & 0x0F00) >> 8] / 100;
+                    memory[I + 1] = (V[(opcode & 0x0F00) >> 8] / 10) % 10;
+                    memory[I + 2] = (V[(opcode & 0x0F00) >> 8] % 100) % 10;
+                    pc += 2;
                     break;
             }
             break;
