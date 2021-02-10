@@ -21,7 +21,6 @@ unsigned char sound_timer = 0;
 unsigned short stack[16];
 unsigned char sp = 0;
 unsigned char key[16];
-unsigned char drawFlag = 0;
 unsigned char fontset[80] = 
 { 
   0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -49,7 +48,8 @@ void emulateCycle() {
         case 0x0000:
             switch (opcode & 0x000f) {
                 case 0x0000:
-                    // clear the display
+                    for (int i = 0; i < 64 * 32; i++)
+                        gfx[i] = 0;
                     pc += 2;
                     break;
                 case 0x000e:
@@ -168,10 +168,25 @@ void emulateCycle() {
             pc += 2;
         }
         break;
-        case 0xd000:
-            // affichage
-            pc += 2;
-            break; 
+        case 0xd000: {
+            unsigned short x = V[(opcode & 0x0F00) >> 8];
+            unsigned short y = V[(opcode & 0x00F0) >> 4];
+            unsigned short height = opcode & 0x000F;
+            unsigned short pixel;
+            V[0xF] = 0;
+            for (int yline = 0; yline < height; yline++) {
+                pixel = memory[I + yline];
+                for(int xline = 0; xline < 8; xline++) {
+                    if((pixel & (0x80 >> xline)) != 0) {
+                        if(gfx[(x + xline + ((y + yline) * 64))] == 1)
+                            V[0xF] = 1;                                 
+                        gfx[x + xline + ((y + yline) * 64)] ^= 1;
+                    }
+                }
+            }
+          pc += 2;
+        }
+        break;
         case 0xe000:
             switch (opcode & 0x000f) {
                 case 0x000e:
@@ -221,7 +236,7 @@ void emulateCycle() {
                     pc += 2;
                     break;
                 case 0x0009:
-                    // graphics
+                    I = V[(opcode & 0x0f00) >> 8] * 5;
                     pc += 2;
                     break;
                 case 0x0003:
@@ -258,8 +273,7 @@ int main(int argc, char **argv) {
 
     for (;;) {
         emulateCycle();
-        // if (drawFlag)
-            // drax graphics
+        // drax graphics
         if (delay_timer > 0)
             --delay_timer;
         if (sound_timer > 0) {
