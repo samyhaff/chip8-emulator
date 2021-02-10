@@ -56,6 +56,7 @@ void emulateCycle() {
                 case 0x000e:
                     sp--;
                     pc = stack[sp];
+                    pc += 2;
                     break;
             }
             break;
@@ -127,7 +128,7 @@ void emulateCycle() {
                     pc += 2;
                     break;
                 case 0x0006:
-                    if (V[(opcode & 0x0f00) >> 8] & 0x0001 == 1) 
+                    if ((V[(opcode & 0x0f00) >> 8] & 0x0001) == 1) 
                         V[0xf] = 1;
                     else
                         V[0xf] = 0;
@@ -143,7 +144,7 @@ void emulateCycle() {
                     pc += 2;
                     break;
                 case 0x000e:
-                    if (V[(opcode & 0x8000) >> 15] == 1)
+                    if (V[(opcode & 0x0f00) >> 8] >> 7 == 1)
                         V[0xf] = 1;
                     else
                         V[0xf] = 0;
@@ -191,12 +192,12 @@ void emulateCycle() {
         case 0xe000:
             switch (opcode & 0x000f) {
                 case 0x000e:
-                    if (key[V[(opcode & 0x0f00) >> 8]])
+                    if (key[V[(opcode & 0x0f00) >> 8]] == 1)
                         pc += 2;
                     pc += 2;
                     break;
                 case 0x0001:
-                    if (!key[V[(opcode & 0x0f00) >> 8]])
+                    if (!(key[V[(opcode & 0x0f00) >> 8]] == 1))
                         pc += 2;
                     pc += 2;
                     break;
@@ -274,11 +275,13 @@ void emulateCycle() {
                         case 0x0050:
                             for (int i = 0; i <= (opcode & 0x0f00) >> 8; i++) 
                                 memory[I + i] = V[i];
+                            I += ((opcode & 0x0f00) >> 8) + 1; // hmmmm
                             pc += 2;
                             break;
                         case 0x0060:
                             for (int i = 0; i <= (opcode & 0x0f00) >> 8; i++)
                                 V[i] = memory[I + i];
+                            I += ((opcode & 0x0f00) >> 8) + 1; // hmmmm
                             pc += 2;
                             break;
                     }
@@ -288,6 +291,10 @@ void emulateCycle() {
                     pc += 2;
                     break;
                 case 0x000e:
+                    if (I + V[(opcode & 0x0f00) >> 8] > 0x0fff)
+                        V[0xf] = 1;
+                    else
+                        V[0xf] = 0;
                     I += V[(opcode & 0x0f00) >> 8];
                     pc += 2;
                     break;
@@ -339,6 +346,16 @@ int main(int argc, char **argv) {
     // load fontset
     for (int i = 0; i < 80; i++)
         memory[i] = fontset[i];
+
+    // clear memory, stack, display and registers
+    for (int i = 0; i < 16; i++) {
+        V[i] = 0;
+        stack[i] = 0;
+    }
+    for (int i= 0; i < 4096; i++)
+        memory[i] = 0;
+    for (int i = 0; i < 64 * 32; i++)
+        gfx[i] = 0;
 
     // load program
     FILE *f = fopen(argv[1], "rb");
