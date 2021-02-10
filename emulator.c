@@ -3,7 +3,7 @@ TODO get key presses
 TODO set speed to 60Hz
 TODO add all opcodes
 TODO BEEP
-TODO TUI
+TODO draw screen
 */
 
 #include <stdio.h>
@@ -250,6 +250,20 @@ void emulateCycle() {
     }
 }
 
+void draw() {
+    printf("\e[1;1H\e[2J"); // clear screen
+    unsigned char pixel;
+    for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 64; x++) {
+            pixel = gfx[x + (64 * y)];
+            if (pixel) 
+                printf("#");
+            else
+                printf(" ");
+        }
+        printf("\n");
+    }    
+}
 
 int main(int argc, char **argv) {
     // load fontset
@@ -273,7 +287,7 @@ int main(int argc, char **argv) {
 
     for (;;) {
         emulateCycle();
-        // drax graphics
+        draw();
         if (delay_timer > 0)
             --delay_timer;
         if (sound_timer > 0) {
