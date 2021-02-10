@@ -6,12 +6,15 @@ TODO BEEP
 */
 
 #define FREQUENCY 60
+#define HEIGHT 32
+#define WIDTH 64
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <time.h>
 #include <unistd.h>
+#include <curses.h>
 
 const double delay = 1000 / FREQUENCY;
 
@@ -195,11 +198,13 @@ void emulateCycle() {
         case 0xe000:
             switch (opcode & 0x000f) {
                 case 0x000e:
-                    // key
+                    if (key[V[(opcode & 0x0f00) >> 8]])
+                        pc += 2;
                     pc += 2;
                     break;
                 case 0x0001:
-                    // key
+                    if (!key[V[(opcode & 0x0f00) >> 8]])
+                        pc += 2;
                     pc += 2;
                     break;
             }
@@ -210,10 +215,14 @@ void emulateCycle() {
                     V[(opcode & 0x0f00) >> 8] = delay_timer;
                     pc += 2;
                     break;
-                case 0x000a:
-                    // key
+                case 0x000a: {
+                    /* char pressed = getc(); */
+                    /* switch (pressed) { */
+                    /*     case " */
+                    /* } */
                     pc += 2;
-                    break;
+                }
+                break;
                 case 0x0005:
                     switch (opcode & 0x00f0) {
                         case 0x0010:
@@ -255,24 +264,33 @@ void emulateCycle() {
     }
 }
 
-void draw() {
-    printf("\e[1;1H\e[2J"); // clear screen
+void draw(WINDOW *win) {
     unsigned char pixel;
     for (int y = 0; y < 32; y++) {
         for (int x = 0; x < 64; x++) {
             pixel = gfx[x + (64 * y)];
             if (pixel) 
-                printf("#");
+                mvwprintw(win, y, x, "#");
             else
-                printf(" ");
+                mvwprintw(win, y, x, " ");
         }
         printf("\n");
     }    
+    wrefresh(win);
 }
 
 int main(int argc, char **argv) {
     clock_t start, end;
     double time;
+
+    initscr();
+    cbreak();
+    noecho();
+
+    WINDOW *program = newwin(HEIGHT, WIDTH, 0, 0);
+    refresh();
+
+    box(program, 0, 0);
 
     // load fontset
     for (int i = 0; i < 80; i++)
@@ -296,7 +314,7 @@ int main(int argc, char **argv) {
     for (;;) {
         start = clock();
         emulateCycle();
-        draw();
+        draw(program);
         if (delay_timer > 0)
             --delay_timer;
         if (sound_timer > 0) {
@@ -308,6 +326,8 @@ int main(int argc, char **argv) {
         time = 1000 * (((double) (end - start)) / CLOCKS_PER_SEC);
         sleep((delay - time) / 1000);
     }
+
+    endwin();
 
     return 0;
 }
