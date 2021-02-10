@@ -3,12 +3,17 @@ TODO get key presses
 TODO set speed to 60Hz
 TODO add all opcodes
 TODO BEEP
-TODO draw screen
 */
+
+#define FREQUENCY 60
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <time.h>
+#include <unistd.h>
+
+const double delay = 1000 / FREQUENCY;
 
 unsigned short opcode;
 unsigned char memory[4096]; 
@@ -266,6 +271,9 @@ void draw() {
 }
 
 int main(int argc, char **argv) {
+    clock_t start, end;
+    double time;
+
     // load fontset
     for (int i = 0; i < 80; i++)
         memory[i] = fontset[i];
@@ -286,6 +294,7 @@ int main(int argc, char **argv) {
         memory[i + 512] = buffer[i];
 
     for (;;) {
+        start = clock();
         emulateCycle();
         draw();
         if (delay_timer > 0)
@@ -295,6 +304,9 @@ int main(int argc, char **argv) {
             --sound_timer;
         }
         // store keys state
+        end = clock();
+        time = 1000 * (((double) (end - start)) / CLOCKS_PER_SEC);
+        sleep((delay - time) / 1000);
     }
 
     return 0;
