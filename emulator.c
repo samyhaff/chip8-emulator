@@ -1,9 +1,9 @@
 /* 
 TODO get key presses
 TODO set speed to 60Hz
-TODO SDL 
 TODO add all opcodes
 TODO BEEP
+TODO TUI
 */
 
 #include <stdio.h>
@@ -72,7 +72,7 @@ void emulateCycle() {
             pc += 2;
             break;
         case 0x4000:
-           if (V[(opc=de & 0x0f00) >> 8]  != opcode & 0x00ff)
+           if (V[(opcode & 0x0f00) >> 8]  != opcode & 0x00ff)
                pc += 2;
             pc += 2;
             break;
@@ -107,7 +107,7 @@ void emulateCycle() {
                     V[(opcode & 0x0f00) >> 8] ^= V[(opcode & 0x00f0) >> 4];
                     pc += 2;
                     break;
-                case 0x0004:
+                case 0x0004: {
                     unsigned short result = V[(opcode & 0x0f00) >> 8] + V[(opcode & 0x00f0) >> 4];
                     if (result > 255)
                         V[0xf] = 1;
@@ -115,9 +115,10 @@ void emulateCycle() {
                         V[0xf] = 0;
                     V[(opcode & 0x0f00) >> 8] = result && 0x00ff;
                     pc += 2;
-                    break;
+                }
+                break;
                 case 0x0005:
-                    if V[(opcode & 0x0f00) >> 8] > V[(opcode & 0x00f0) >> 4]
+                    if (V[(opcode & 0x0f00) >> 8] > V[(opcode & 0x00f0) >> 4])
                         V[0xf] = 1;
                     else
                         V[0xf] = 0;
@@ -133,7 +134,7 @@ void emulateCycle() {
                     pc += 2;
                     break;
                 case 0x0007:
-                    if V[(opcode & 0x0f00) >> 8] < V[(opcode & 0x00f0) >> 4]
+                    if (V[(opcode & 0x0f00) >> 8] < V[(opcode & 0x00f0) >> 4])
                         V[0xf] = 1;
                     else
                         V[0xf] = 0;
@@ -151,7 +152,7 @@ void emulateCycle() {
             }
             break;
         case 0x9000:
-            if !(V[(opcode & 0x0f00) >> 8] == V[(opcode & 0x00f0) >> 4])
+            if (!(V[(opcode & 0x0f00) >> 8] == V[(opcode & 0x00f0) >> 4]))
                 pc += 2;
             pc += 2;
             break;
@@ -161,11 +162,12 @@ void emulateCycle() {
             break;
         case 0xb000:
             pc = V[0] + (opcode & 0x0fff);
-        case 0xc000:
+        case 0xc000: {
             unsigned char r = rand() % 256;            
             V[(opcode & 0x0f00) >> 8] = (opcode & 0x00ff) & r;
             pc += 2;
-            break;
+        }
+        break;
         case 0xd000:
             // affichage
             pc += 2;
@@ -177,6 +179,40 @@ void emulateCycle() {
                     break;
                 case 0x0001:
                     // key
+                    break;
+            }
+            break;
+        case 0xf000:
+            switch (opcode & 0x000f) {
+                case 0x0007:
+                    V[(opcode & 0x0f00) >> 8] = delay_timer;
+                    break;
+                case 0x000a:
+                    // key
+                    break;
+                case 0x0005:
+                    switch (opcode & 0x00f0) {
+                        case 0x0010:
+                            delay_timer = V[(opcode & 0x0f00) >> 8];
+                            break;
+                        case 0x0050:
+                            // memory
+                            break;
+                        case 0x0060:
+                            break;
+                    }
+                    break;
+                case 0x0008:
+                    sound_timer = V[(opcode & 0x0f00) >> 8];
+                    break;
+                case 0x000e:
+                    I += V[(opcode & 0x0f00) >> 8];
+                    break;
+                case 0x0009:
+                    // graphics
+                    break;
+                case 0x0003:
+                    // decimal
                     break;
             }
             break;
@@ -211,8 +247,9 @@ int main(int argc, char **argv) {
         if (delay_timer > 0)
             --delay_timer;
         if (sound_timer > 0) {
-            printf("BEEP\n");
+            // BEEP
             --sound_timer;
+        }
         // store keys state
     }
 
