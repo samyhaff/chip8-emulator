@@ -381,7 +381,7 @@ int main(int argc, char **argv) {
         if (delay_timer > 0)
             --delay_timer;
         if (sound_timer > 0) {
-            // BEEP
+            beep();
             --sound_timer;
         }
 
