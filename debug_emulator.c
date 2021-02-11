@@ -1,7 +1,3 @@
-#define FREQUENCY 60
-#define HEIGHT 32
-#define WIDTH 64
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -9,7 +5,7 @@
 #include <unistd.h>
 #include <curses.h>
 
-const double delay = 1000 / FREQUENCY;
+/* const double delay = 1000 / FREQUENCY; */
 
 unsigned short opcode;
 unsigned char memory[4096]; 
@@ -44,6 +40,7 @@ unsigned char fontset[80] =
 
 void emulateCycle() {
     opcode = memory[pc] << 8 | memory[pc + 1];
+    printf("pc: %03x opcode: %04x\n", pc, opcode);
 
     switch (opcode & 0xf000) {
         case 0x0000:
@@ -213,59 +210,59 @@ void emulateCycle() {
                     pc += 2;
                     break;
                 case 0x000a: {
-                    while (getch() == ERR) 
-                        ;
-                    char pressed = getch();
-                    switch (pressed) {
-                        case 1:
-                            V[(opcode & 0x0f00) >> 8] = 1;
-                            break;
-                        case 2:
-                            V[(opcode & 0x0f00) >> 8] = 2;
-                            break;
-                        case 3:
-                            V[(opcode & 0x0f00) >> 8] = 3;
-                            break;
-                        case 4:
-                            V[(opcode & 0x0f00) >> 8] = 0xc;
-                            break;
-                        case 'a':
-                            V[(opcode & 0x0f00) >> 8] = 4;
-                            break;
-                        case 'z':
-                            V[(opcode & 0x0f00) >> 8] = 5;
-                            break;
-                        case 'e':
-                            V[(opcode & 0x0f00) >> 8] = 6;
-                            break;
-                        case 'r':
-                            V[(opcode & 0x0f00) >> 8] = 0xd;
-                            break;
-                        case 'q':
-                            V[(opcode & 0x0f00) >> 8] = 7;
-                            break;
-                        case 's':
-                            V[(opcode & 0x0f00) >> 8] = 8;
-                            break;
-                        case 'd':
-                            V[(opcode & 0x0f00) >> 8] = 9;
-                            break;
-                        case 'f':
-                            V[(opcode & 0x0f00) >> 8] = 0xe;
-                            break;
-                        case 'w':
-                            V[(opcode & 0x0f00) >> 8] = 0xa;
-                            break;
-                        case 'x':
-                            V[(opcode & 0x0f00) >> 8] = 0;
-                            break;
-                        case 'c':
-                            V[(opcode & 0x0f00) >> 8] = 0xb;
-                            break;
-                        case 'v':
-                            V[(opcode & 0x0f00) >> 8] = 0xf;
-                            break;
-                    }
+                    /* while (getch() == ERR) */ 
+                    /*     ; */
+                    /* char pressed = getch(); */
+                    /* switch (pressed) { */
+                    /*     case 1: */
+                    /*         V[(opcode & 0x0f00) >> 8] = 1; */
+                    /*         break; */
+                    /*     case 2: */
+                    /*         V[(opcode & 0x0f00) >> 8] = 2; */
+                    /*         break; */
+                    /*     case 3: */
+                    /*         V[(opcode & 0x0f00) >> 8] = 3; */
+                    /*         break; */
+                    /*     case 4: */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0xc; */
+                    /*         break; */
+                    /*     case 'a': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 4; */
+                    /*         break; */
+                    /*     case 'z': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 5; */
+                    /*         break; */
+                    /*     case 'e': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 6; */
+                    /*         break; */
+                    /*     case 'r': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0xd; */
+                    /*         break; */
+                    /*     case 'q': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 7; */
+                    /*         break; */
+                    /*     case 's': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 8; */
+                    /*         break; */
+                    /*     case 'd': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 9; */
+                    /*         break; */
+                    /*     case 'f': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0xe; */
+                    /*         break; */
+                    /*     case 'w': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0xa; */
+                    /*         break; */
+                    /*     case 'x': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0; */
+                    /*         break; */
+                    /*     case 'c': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0xb; */
+                    /*         break; */
+                    /*     case 'v': */
+                    /*         V[(opcode & 0x0f00) >> 8] = 0xf; */
+                    /*         break; */
+                    /* } */
                     pc += 2;
                 }
                 break;
@@ -316,34 +313,34 @@ void emulateCycle() {
     }
 }
 
-void draw(WINDOW *win) {
-    unsigned char pixel;
-    for (int y = 0; y < 32; y++) {
-        for (int x = 0; x < 64; x++) {
-            pixel = gfx[x + (64 * y)];
-            if (pixel == 1) 
-                mvwprintw(win, y, x, "#");
-            else
-                mvwprintw(win, y, x, " ");
-        }
-    }    
-    wrefresh(win);
-}
+/* void draw(WINDOW *win) { */
+/*     unsigned char pixel; */
+/*     for (int y = 0; y < 32; y++) { */
+/*         for (int x = 0; x < 64; x++) { */
+/*             pixel = gfx[x + (64 * y)]; */
+/*             if (pixel == 1) */ 
+/*                 mvwprintw(win, y, x, "#"); */
+/*             else */
+/*                 mvwprintw(win, y, x, " "); */
+/*         } */
+/*     } */    
+/*     wrefresh(win); */
+/* } */
 
 int main(int argc, char **argv) {
-    clock_t start, end;
-    double time;
+    /* clock_t start, end; */
+    /* double time; */
 
-    initscr();
-    cbreak();
-    noecho();
-    nodelay(stdscr, TRUE);
-    scrollok(stdscr, TRUE);
+    /* initscr(); */
+    /* cbreak(); */
+    /* noecho(); */
+    /* nodelay(stdscr, TRUE); */
+    /* scrollok(stdscr, TRUE); */
 
-    WINDOW *program = newwin(HEIGHT, WIDTH, 0, 0);
-    refresh();
+    /* WINDOW *program = newwin(HEIGHT, WIDTH, 0, 0); */
+    /* refresh(); */
 
-    box(program, 0, 0);
+    /* box(program, 0, 0); */
 
     // load fontset
     for (int i = 0; i < 80; i++)
@@ -375,9 +372,9 @@ int main(int argc, char **argv) {
         memory[i + 512] = buffer[i];
 
     for (;;) {
-        start = clock();
+        /* start = clock(); */
         emulateCycle();
-        draw(program);
+        /* draw(program); */
         if (delay_timer > 0)
             --delay_timer;
         if (sound_timer > 0) {
@@ -386,66 +383,65 @@ int main(int argc, char **argv) {
         }
 
         // store keys state
-        for (int i = 0; i < 16; i++)
-            key[i] = 0;
-        char pressed = getch();
-        switch (pressed) {
-            case 1:
-                key[1] = 1;
-                break;
-            case 2:
-                key[2] = 1;
-                break;
-            case 3:
-                key[3] = 1;
-                break;
-            case 4:
-                key[0xc] = 1;
-                break;
-            case 'a':
-                key[4] = 1;
-                break;
-            case 'z':
-                key[5] = 1;
-                break;
-            case 'e':
-                key[6] = 1;
-                break;
-            case 'r':
-                key[0xd] = 1;
-                break;
-            case 'q':
-                key[7] = 1;
-                break;
-            case 's':
-                key[8] = 1;
-                break;
-            case 'd':
-                key[9] = 1;
-                break;
-            case 'f':
-                key[0xe] = 1;
-                break;
-            case 'w':
-                key[0xa] = 1;
-                break;
-            case 'x':
-                key[0] = 1;
-                break;
-            case 'c':
-                key[0xb] = 1;
-                break;
-            case 'v':
-                key[0xf] = 1;
-                break;
-        }
+        /* for (int i = 0; i < 16; i++) */
+        /*     key[i] = 0; */
+        /* char pressed = getch(); */
+        /* switch (pressed) { */
+        /*     case 1: */
+        /*         key[1] = 1; */
+        /*         break; */
+        /*     case 2: */
+        /*         key[2] = 1; */
+        /*         break; */
+        /*     case 3: */
+        /*         key[3] = 1; */
+        /*         break; */
+        /*     case 4: */
+        /*         key[0xc] = 1; */
+        /*         break; */
+        /*     case 'a': */
+        /*         key[4] = 1; */
+        /*         break; */
+        /*     case 'z': */
+        /*         key[5] = 1; */
+        /*         break; */
+        /*     case 'e': */
+        /*         key[6] = 1; */
+        /*         break; */
+        /*     case 'r': */
+        /*         key[0xd] = 1; */
+        /*         break; */
+        /*     case 'q': */
+        /*         key[7] = 1; */
+        /*         break; */
+        /*     case 's': */
+        /*         key[8] = 1; */
+        /*         break; */
+        /*     case 'd': */
+        /*         key[9] = 1; */
+        /*         break; */
+        /*     case 'f': */
+        /*         key[0xe] = 1; */
+        /*         break; */
+        /*     case 'w': */
+        /*         key[0xa] = 1; */
+        /*         break; */
+        /*     case 'x': */
+        /*         key[0] = 1; */
+        /*         break; */
+        /*     case 'c': */
+        /*         key[0xb] = 1; */
+        /*         break; */
+        /*     case 'v': */
+        /*         key[0xf] = 1; */
+        /*         break; */
+        /* } */
         
-        end = clock();
-        time = 1000 * (((double) (end - start)) / CLOCKS_PER_SEC);
-        napms((delay - time));
+        /* end = clock(); */
+        /* time = 1000 * (((double) (end - start)) / CLOCKS_PER_SEC); */
     }
 
-    endwin();
+    /* endwin(); */
 
     return 0;
 }
